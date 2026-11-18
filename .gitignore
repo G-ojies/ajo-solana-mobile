@@ -5,3 +5,7 @@ onchain/target/
 .anchor/
 *.log
 .env*
+# personal working docs (submission text, demo/video script, design notes): keep local only
+DESIGN.md
+docs/
+*.private.md
