@@ -5,7 +5,7 @@ import { DEVNET_RPC } from './src/ajo';
 import { CircleScreen, Create, Home, Join, Nav, Route, Settings } from './src/screens';
 import { c } from './src/theme';
 
-const identity = { name: 'Ajo', uri: 'https://github.com/G-ojies/ajo-solana-mobile', icon: 'favicon.ico' };
+const identity = { name: 'Ajo', uri: 'https://g-ojies.github.io/ajo-solana-mobile/', icon: 'icon-192.png' };
 
 /** ajo://join/<circle address> or ajo://circle/<address> opens that circle. */
 function routeFromUrl(url: string | null | undefined): Route | null {
