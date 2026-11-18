@@ -40,9 +40,33 @@ or mint.
 - Fee-on-transfer mints are rejected; mints with a transfer hook are not supported. Use plain USDC.
 - Tokens sent straight to the vault after a circle ends block `close_circle` (only the rent is affected).
 
+## App (`app/`)
+
+Expo (SDK 58, React Native 0.88) custom dev build with Solana Mobile's Mobile Wallet Adapter
+(`@wallet-ui/react-native-web3js`). Members sign every action in their phone wallet; there is no
+browser extension and no server.
+
+Screens: my circles, start a circle, join by code or `ajo://join/<circle>` link, the circle (dial of who
+has paid, pay my contribution, send the pot, payout order, on-chain history with explorer links) and settings.
+
+`app/src/ajo.ts` is a dependency-light client for the program (web3.js v1 + spl-token) shared by the
+app and the Node scripts.
+
+```
+cd app
+npm install
+npx expo run:android        # needs Node >= 22.13, JDK 17, an emulator or device with an MWA wallet
+npx tsx scripts/e2e.ts      # full 3-member circle on devnet (RPC=... to point elsewhere; runs on Node 20)
+npx tsx scripts/fund.ts <address> [usdc] [sol]   # give a demo wallet test USDC and SOL
+```
+
+The e2e script has run against the compiled program on a local validator: 3 members, 3 rounds, each
+collected 30 USDC once, history decoded, circle closed.
+
 ## Built before vs during Dev3pack (27 to 29 Nov 2026)
 
-Before the event (allowed by the FAQ): the program, its tests, and the screen design.
+Before the event (allowed by the FAQ): the program and its tests, the app's first version, the scripts
+and the screen design.
 During the event: listed here as it happens.
 
 ## License
