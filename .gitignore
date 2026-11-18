@@ -1,0 +1,7 @@
+# private working notes, never commit
+PLAN.md
+node_modules/
+onchain/target/
+.anchor/
+*.log
+.env*

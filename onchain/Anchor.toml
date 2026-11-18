@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "1.0.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+ajo = "66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b"
+
+[programs.devnet]
+ajo = "66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --release"
