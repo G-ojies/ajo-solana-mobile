@@ -1,0 +1,32 @@
+{
+  "name": "ajo",
+  "version": "1.0.0",
+  "main": "./index.js",
+  "dependencies": {
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.99.0",
+    "@wallet-ui/react-native-web3js": "^4.4.1",
+    "buffer": "^6.0.3",
+    "expo": "~58.0.26",
+    "expo-dev-client": "^58.0.21",
+    "expo-status-bar": "~58.0.5",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-nitro-modules": "^0.37.2",
+    "react-native-quick-crypto": "^1.1.10"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "~19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "e2e": "tsx scripts/e2e.ts",
+    "fund": "tsx scripts/fund.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "private": true
+}
