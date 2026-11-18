@@ -1,5 +1,7 @@
 # Ajo on Solana Mobile
 
+**[Project page](https://g-ojies.github.io/ajo-solana-mobile/)** · **[Download the Android app (devnet)](https://github.com/G-ojies/ajo-solana-mobile/releases/latest)**
+
 The rotating savings circle (ajo, esusu, susu) with the pot held by a Solana program instead of a person.
 
 Every member pays a fixed amount each round. When everyone has paid, anyone can send the whole pot to
