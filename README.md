@@ -8,7 +8,8 @@ recompute it. No admin key, no fee, and the creator cannot touch the pot.
 
 ## Program (`onchain/programs/ajo`)
 
-Anchor 1.0. Devnet program id: `66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b` (deploy pending).
+Anchor 1.0. **Live on devnet:** program [`66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b`](https://explorer.solana.com/address/66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b?cluster=devnet).
+Test USDC mint (devnet): `234ncajJBfiu5MZwZqExTjhzhotgWz1nqWJjzR6KpqMJ`.
 
 | Instruction | Who | What |
 |---|---|---|
@@ -60,8 +61,14 @@ npx tsx scripts/e2e.ts      # full 3-member circle on devnet (RPC=... to point e
 npx tsx scripts/fund.ts <address> [usdc] [sol]   # give a demo wallet test USDC and SOL
 ```
 
-The e2e script has run against the compiled program on a local validator: 3 members, 3 rounds, each
-collected 30 USDC once, history decoded, circle closed.
+Verified on devnet (18 Nov 2026):
+- `scripts/e2e.ts`: a 3-member circle, 3 rounds, each member collected 30 USDC once
+  (circle [`xoPDWK…`](https://explorer.solana.com/address/xoPDWKWEGhyrb1FZC6bztoi4Ys9mrx6AaFwjM1L7dq3?cluster=devnet)).
+- In the app on an Android emulator with Solana Mobile's mock MWA wallet: created a 2-member circle,
+  a second member joined by code, started, paid, sent the pot, second round, finished
+  (circle `6piiH4…`). Every step signed in the phone wallet.
+
+`scripts/member.ts <n> join|pay|payout <code>` plays the other members from the command line.
 
 ## Built before vs during Dev3pack (27 to 29 Nov 2026)
 

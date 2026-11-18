@@ -427,34 +427,47 @@ export type HistoryItem = {
   who: PublicKey | null;
 };
 
-export async function fetchHistory(conn: Connection, circle: PublicKey, limit = 40): Promise<HistoryItem[]> {
-  const sigs = await conn.getSignaturesForAddress(circle, { limit });
-  const ok = sigs.filter((s) => !s.err);
-  if (ok.length === 0) return [];
-  const txs = await conn.getTransactions(
-    ok.map((s) => s.signature),
-    { maxSupportedTransactionVersion: 0 },
-  );
-  return ok.map((s, i) => {
-    const tx = txs[i];
-    const logs = tx?.meta?.logMessages ?? [];
-    const has = (n: string) => logs.some((l) => l === `Program log: Instruction: ${n}`);
-    const kind: HistoryItem['kind'] = has('CreateCircle')
-      ? 'created'
-      : has('Join')
-        ? 'joined'
-        : has('Start')
-          ? 'started'
-          : has('Contribute')
-            ? 'paid'
-            : has('Payout')
-              ? 'payout'
-              : has('CloseCircle')
-                ? 'closed'
-                : 'other';
-    const keys = tx?.transaction.message.getAccountKeys?.().staticAccountKeys;
-    return { signature: s.signature, time: s.blockTime ?? null, kind, who: keys?.[0] ?? null };
-  });
+const historyCache = new Map<string, HistoryItem>();
+
+function classify(sig: string, time: number | null, tx: Awaited<ReturnType<Connection['getTransaction']>>): HistoryItem {
+  const logs = tx?.meta?.logMessages ?? [];
+  const has = (n: string) => logs.some((l) => l === `Program log: Instruction: ${n}`);
+  const kind: HistoryItem['kind'] = has('CreateCircle')
+    ? 'created'
+    : has('Join')
+      ? 'joined'
+      : has('Start')
+        ? 'started'
+        : has('Contribute')
+          ? 'paid'
+          : has('Payout')
+            ? 'payout'
+            : has('CloseCircle')
+              ? 'closed'
+              : 'other';
+  // The acting member is the last required signer (the first one may be a separate fee payer).
+  const msg = tx?.transaction.message;
+  const keys = msg?.getAccountKeys?.().staticAccountKeys;
+  const who = keys && msg ? keys[Math.max(0, msg.header.numRequiredSignatures - 1)] : null;
+  return { signature: sig, time, kind, who };
+}
+
+/**
+ * Transactions that touched the circle, newest first. Each transaction is fetched once and cached,
+ * one at a time, so the public devnet RPC does not rate-limit us. On an RPC error it returns what it has.
+ */
+export async function fetchHistory(conn: Connection, circle: PublicKey, limit = 25): Promise<HistoryItem[]> {
+  const sigs = (await conn.getSignaturesForAddress(circle, { limit })).filter((s) => !s.err);
+  for (const s of sigs) {
+    if (historyCache.has(s.signature)) continue;
+    try {
+      const tx = await conn.getTransaction(s.signature, { maxSupportedTransactionVersion: 0, commitment: 'confirmed' });
+      if (tx) historyCache.set(s.signature, classify(s.signature, s.blockTime ?? null, tx));
+    } catch {
+      break; // rate limited: show what we have, fill in on the next refresh
+    }
+  }
+  return sigs.map((s) => historyCache.get(s.signature)).filter((h): h is HistoryItem => !!h);
 }
 
 export function explorerTx(sig: string): string {

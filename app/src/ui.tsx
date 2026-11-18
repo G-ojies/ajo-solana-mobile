@@ -103,7 +103,7 @@ export function Muted({ children, style }: { children: React.ReactNode; style?: 
 
 /** Build, sign with the phone wallet (MWA) and confirm a transaction. */
 export function useSend() {
-  const { account, connection, signAndSendTransaction } = useMobileWallet();
+  const { account, connection, signAndSendTransactions } = useMobileWallet();
   return async (ixs: TransactionInstruction[]): Promise<string> => {
     if (!account) throw new Error('Connect your wallet first');
     const {
@@ -111,7 +111,7 @@ export function useSend() {
       value: { blockhash, lastValidBlockHeight },
     } = await connection.getLatestBlockhashAndContext();
     const tx = new Transaction({ feePayer: account.publicKey, blockhash, lastValidBlockHeight }).add(...ixs);
-    const sig = (await signAndSendTransaction(tx, minContextSlot)) as unknown as string;
+    const [sig] = (await signAndSendTransactions([tx], minContextSlot)) as unknown as string[];
     const res = await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed');
     if (res.value.err) throw new Error(`Transaction failed: ${JSON.stringify(res.value.err)}`);
     return sig;
@@ -125,6 +125,8 @@ export function explain(e: unknown): string {
   const known: [RegExp, string][] = [
     [/insufficient funds|0x1\b/i, 'Not enough test USDC or SOL in this wallet. See Settings for how to get some.'],
     [/declined|rejected|cancell?ed by (the )?user|user.*cancel/i, 'You cancelled in the wallet.'],
+    [/CancellationException|not authenticated/i, 'The wallet closed before signing. Open your wallet, unlock it, and try again.'],
+    [/payloads invalid|-2\//i, 'Your wallet account changed. Go to Settings, disconnect, and connect again.'],
     [/AlreadyPaid|0x177d/i, 'You have already paid this round.'],
     [/RoundNotReady|0x177f/i, 'Not everyone has paid yet, and the grace period is still running.'],
     [/CircleFull|0x1777/i, 'This circle is full.'],

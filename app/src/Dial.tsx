@@ -12,7 +12,8 @@ export function Dial({ circle, size = 220, me, showCenter = true }: Props) {
   const seat = Math.max(18, Math.min(40, size / (n > 8 ? 6.5 : 5)));
   const radius = size / 2 - seat / 2 - 4;
   const recipient = recipientIndex(circle);
-  const pot = circle.contribution * BigInt(circle.members.length);
+  // While forming, show the pot the circle will have once full.
+  const pot = circle.contribution * BigInt(circle.state === 'forming' ? circle.capacity : circle.members.length);
 
   return (
     <View style={{ width: size, height: size }}>
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: c.card,
     borderWidth: 2,
+    borderStyle: 'solid',
     borderColor: c.indigo,
     alignItems: 'center',
     justifyContent: 'center',

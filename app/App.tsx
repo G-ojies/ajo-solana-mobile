@@ -17,6 +17,7 @@ export default function App() {
   const [stack, setStack] = useState<Route[]>([{ name: 'home' }]);
   const nav: Nav = {
     go: (r) => setStack((s) => (r.name === 'home' ? [r] : [...s, r])),
+    replace: (r) => setStack((s) => [...s.slice(0, -1), r]),
     back: () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s)),
   };
 

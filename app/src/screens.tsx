@@ -14,7 +14,7 @@ export type Route =
   | { name: 'circle'; address: string }
   | { name: 'settings' };
 
-export type Nav = { go: (r: Route) => void; back: () => void };
+export type Nav = { go: (r: Route) => void; replace: (r: Route) => void; back: () => void };
 
 const now = () => Math.floor(Date.now() / 1000);
 
@@ -109,6 +109,7 @@ export function Home({ nav }: { nav: Nav }) {
   }, [connection, me?.toBase58()]);
 
   useEffect(() => {
+    if (me) console.log('[ajo] wallet', me.toBase58());
     load();
   }, [load]);
 
@@ -156,6 +157,10 @@ function statusLine(x: ajo.Circle, me: PublicKey): string {
   return `You have collected · ${paid}`;
 }
 
+function potSeats(x: ajo.Circle): number {
+  return x.state === 'forming' ? x.capacity : x.members.length;
+}
+
 function CircleCard({ circle, me, onPress }: { circle: ajo.Circle; me: PublicKey; onPress: () => void }) {
   const owed = ajo.owedNow(circle, me, now());
   return (
@@ -165,8 +170,8 @@ function CircleCard({ circle, me, onPress }: { circle: ajo.Circle; me: PublicKey
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={styles.cardTitle}>{circle.name}</Text>
           <Text style={{ color: c.ink }}>
-            {ajo.formatUsdc(circle.contribution * BigInt(circle.members.length))} USDC pot ·{' '}
-            {naira(Number(circle.contribution) * circle.members.length / 1e6)}
+            {ajo.formatUsdc(circle.contribution * BigInt(potSeats(circle)))} USDC pot ·{' '}
+            {naira((Number(circle.contribution) * potSeats(circle)) / 1e6)}
           </Text>
           <Muted>{statusLine(circle, me)}</Muted>
           {owed && (
@@ -225,7 +230,7 @@ export function Create({ nav }: { nav: Nav }) {
           lateFee: fee,
         }),
       ]);
-      nav.go({ name: 'circle', address: ajo.circlePda(account.publicKey, circleId).toBase58() });
+      nav.replace({ name: 'circle', address: ajo.circlePda(account.publicKey, circleId).toBase58() });
     } catch (e) {
       Alert.alert('Could not create the circle', explain(e));
     } finally {
@@ -286,7 +291,7 @@ export function Join({ nav, code: initial }: { nav: Nav; code?: string }) {
     setNotFound(false);
     try {
       const x = await ajo.findByCode(connection, code);
-      if (x) nav.go({ name: 'circle', address: x.address.toBase58() });
+      if (x) nav.replace({ name: 'circle', address: x.address.toBase58() });
       else setNotFound(true);
     } catch (e) {
       Alert.alert('Could not look up the code', explain(e));
@@ -343,7 +348,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
   useEffect(() => {
     load();
     const t = setInterval(() => setClock(now()), 1000);
-    const r = setInterval(load, 8000);
+    const r = setInterval(load, 15000);
     return () => {
       clearInterval(t);
       clearInterval(r);
@@ -513,7 +518,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
 
 function historyVerb(k: ajo.HistoryItem['kind']): string {
   return {
-    created: 'started the circle',
+    created: 'created the circle',
     joined: 'joined',
     started: 'drew the order and began round 1',
     paid: 'paid in',

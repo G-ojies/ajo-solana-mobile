@@ -57,9 +57,9 @@ async function main() {
   }
   c = (await ajo.fetchCircle(conn, circle))!;
   console.log('state', c.state, 'total paid out', ajo.formatUsdc(c.totalPaidOut));
-  const hist = await ajo.fetchHistory(conn, circle);
+  const hist = await ajo.fetchHistory(conn, circle, 40);
   console.log('history kinds', hist.map((h) => h.kind).reverse().join(','));
-  await send('close_circle', [ajo.closeCircleIx(payer.publicKey, c)], [payer]);
+  if (!process.env.KEEP) await send('close_circle', [ajo.closeCircleIx(payer.publicKey, c)], [payer]);
   console.log('circle', circle.toBase58());
 }
 

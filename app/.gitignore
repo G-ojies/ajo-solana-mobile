@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# demo member keys (devnet only)
+scripts/.demo-members.json
