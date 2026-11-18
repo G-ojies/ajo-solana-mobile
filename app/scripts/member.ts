@@ -5,6 +5,7 @@
 //   npx tsx scripts/member.ts <n> pay <code|address>
 //   npx tsx scripts/member.ts <n> payout <code|address>
 //   npx tsx scripts/member.ts <n> address
+// <code|address> may also be 'latest' for the newest circle.
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
@@ -47,7 +48,8 @@ async function main() {
   const [nArg, cmd, code] = process.argv.slice(2);
   const kp = await member(Number(nArg));
   if (cmd === 'address') return console.log(kp.publicKey.toBase58());
-  const c = await ajo.findByCode(conn, code ?? '');
+  // 'latest' = the most recently created circle (handy when filming)
+  const c = code === 'latest' ? (await ajo.fetchAllCircles(conn))[0] ?? null : await ajo.findByCode(conn, code ?? '');
   if (!c) throw new Error(`no circle for ${code}`);
   if (cmd === 'join') await send(kp, [ajo.joinIx(kp.publicKey, c.address)]);
   else if (cmd === 'pay') await send(kp, [ajo.contributeIx(kp.publicKey, c)]);
