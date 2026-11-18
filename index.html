@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajo on Solana Mobile</title>
+<meta name="description" content="The rotating savings circle, with the pot held by a Solana program instead of a person.">
+<link rel="icon" href="favicon.png">
+<style>
+  :root { --bg:#f7f1e3; --card:#fffaf0; --ink:#171c3a; --muted:#565a73; --line:#e2d7bd; --indigo:#1a2763; --marigold:#f4ab1f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { display:flex; gap:16px; align-items:center; }
+  header img { width:72px; height:72px; border-radius:18px; }
+  h1 { font-size: 30px; margin: 0; color: var(--indigo); }
+  .lede { font-size: 20px; margin: 24px 0; }
+  ol { padding-left: 20px; }
+  li { margin: 8px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 20px; margin:20px 0; }
+  a { color: var(--indigo); font-weight: 600; }
+  .btn { display:inline-block; background:var(--indigo); color:#fff; text-decoration:none; padding:12px 18px; border-radius:12px; margin: 4px 8px 4px 0; }
+  .btn.alt { background: transparent; color: var(--indigo); border: 1.5px solid var(--indigo); }
+  code { font-size: 13px; word-break: break-all; }
+  .muted { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="icon-192.png" alt=""><div><h1>Ajo</h1><div class="muted">on Solana Mobile</div></div></header>
+  <p class="lede">The rotating savings circle your family already trusts, with the pot held by a Solana program instead of a person.</p>
+  <div class="card">
+    <ol>
+      <li><b>Agree the rules.</b> Amount, number of people, how often.</li>
+      <li><b>Everyone pays in</b> from their phone wallet, straight into the circle's vault.</li>
+      <li><b>One person collects</b> the whole pot each round, in an order drawn by code anyone can check.</li>
+      <li><b>Nobody can hold the circle up.</b> After a grace period the round goes ahead and a missed payment is on record.</li>
+    </ol>
+  </div>
+  <p>
+    <a class="btn" href="https://github.com/G-ojies/ajo-solana-mobile/releases/latest">Download the Android app</a>
+    <a class="btn alt" href="https://github.com/G-ojies/ajo-solana-mobile">Source code</a>
+  </p>
+  <p class="muted">Devnet program: <code>66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b</code><br>
+  <a href="https://explorer.solana.com/address/66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b?cluster=devnet">View on Solana Explorer</a></p>
+  <p class="muted">Test build on Solana devnet with test USDC only. Needs an Android wallet that supports Mobile Wallet Adapter.</p>
+</main>
+</body>
+</html>
