@@ -463,6 +463,19 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
       )}
       {x.state === 'forming' && isMember && !isCreator && <Muted style={{ textAlign: 'center' }}>You are in. The creator starts the circle.</Muted>}
       {x.state === 'forming' && <Button title="Share invite" kind="ghost" onPress={invite} />}
+      {x.state === 'forming' && isCreator && (
+        <Button title="Cancel circle" kind="ghost" busy={busy === 'cancel'}
+          onPress={() =>
+            Alert.alert('Cancel this circle?', 'Nobody has paid anything yet. The circle is closed and you get the rent back.', [
+              { text: 'Keep it', style: 'cancel' },
+              { text: 'Cancel circle', style: 'destructive', onPress: async () => {
+                setBusy('cancel');
+                try { await send([ajo.closeCircleIx(me!, x)]); nav.go({ name: 'home' }); }
+                catch (e) { Alert.alert('Something went wrong', explain(e)); }
+                finally { setBusy(null); }
+              } },
+            ])} />
+      )}
 
       {x.state === 'active' && owed && (
         <Button title={`Pay my ${ajo.formatUsdc(owed.amount)} USDC${owed.late ? ' (late)' : ''}`} kind="gold" busy={busy === 'pay'}
