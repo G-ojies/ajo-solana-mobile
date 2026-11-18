@@ -25,6 +25,11 @@
     "scheme": "ajo",
     "plugins": [
       "expo-dev-client"
-    ]
+    ],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a2763"
+    }
   }
 }
