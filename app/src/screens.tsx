@@ -143,7 +143,32 @@ export function Home({ nav }: { nav: Nav }) {
       )}
       <Button title="Start a circle" onPress={() => nav.go({ name: 'create' })} disabled={!me} />
       <Button title="Join with code" kind="ghost" onPress={() => nav.go({ name: 'join' })} disabled={!me} />
+      <HowItWorks />
     </Screen>
+  );
+}
+
+const STEPS: [string, string][] = [
+  ['Agree the rules', 'Amount, number of people, how often. The program holds the circle to them.'],
+  ['Everyone pays in', 'Each round, members pay from their phone wallet straight into the circle, not to a person.'],
+  ['One person collects', 'When everyone has paid, the whole pot goes to that round\'s member, in an order drawn by code anyone can check.'],
+  ['Until all have collected', 'A member who does not pay cannot hold everyone up: after a grace period the round goes ahead and the miss is on record.'],
+];
+
+function HowItWorks() {
+  return (
+    <Card style={{ gap: 12 }}>
+      <Text style={styles.cardTitle}>How it works</Text>
+      {STEPS.map(([title, body], i) => (
+        <View key={i} style={{ flexDirection: 'row', gap: 12 }}>
+          <Text style={styles.round}>{i + 1}</Text>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ color: c.ink, fontWeight: '700' }}>{title}</Text>
+            <Muted>{body}</Muted>
+          </View>
+        </View>
+      ))}
+    </Card>
   );
 }
 
@@ -445,7 +470,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
       )}
       {x.state === 'active' && isMember && !owed && <Text style={[styles.status, { color: c.green }]}>Paid this round ✓</Text>}
       {x.state === 'active' && ajo.canPayout(x, clock) && me && recipient && (
-        <Button title={`Send pot to ${label(recipient)}`} busy={busy === 'payout'}
+        <Button title={ajo.paidCount(x) === n ? `Send pot to ${label(recipient)}` : `Send pot to ${label(recipient)} (${n - ajo.paidCount(x)} missed)`} busy={busy === 'payout'}
           onPress={() => act('payout', () => ajo.payoutIxs(me, x))} />
       )}
       {x.state === 'done' && isCreator && (
@@ -501,10 +526,10 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
         {history.length === 0 && <Muted>Nothing yet.</Muted>}
         {history.map((h) => (
           <Pressable key={h.signature} onPress={() => Linking.openURL(ajo.explorerTx(h.signature))} style={styles.row}>
-            <Text style={styles.member}>
-              {h.who ? label(h.who) : '?'} {historyVerb(h.kind)}
+            <Text style={{ flex: 1, color: c.ink }}>
+              <Text style={{ fontFamily: mono }}>{h.who ? label(h.who) : '?'}</Text> {historyVerb(h.kind)}
             </Text>
-            <Text style={styles.badge}>{h.time ? new Date(h.time * 1000).toLocaleString() : ''} ↗</Text>
+            <Text style={styles.badge}>{fmtWhen(h.time)} ↗</Text>
           </Pressable>
         ))}
         <Muted style={{ fontSize: 12 }}>Every line here is a Solana transaction. Nobody can edit it.</Muted>
@@ -526,6 +551,15 @@ function historyVerb(k: ajo.HistoryItem['kind']): string {
     closed: 'closed the circle',
     other: 'sent a transaction',
   }[k];
+}
+
+function fmtWhen(t: number | null): string {
+  if (!t) return '';
+  const d = new Date(t * 1000);
+  const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  if (d.toDateString() === new Date().toDateString()) return hm;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${hm}`;
 }
 
 function fmtDuration(s: number): string {

@@ -43,8 +43,8 @@ export function Dial({ circle, size = 220, me, showCenter = true }: Props) {
               collecting && styles.collecting,
             ]}
           >
-            <Text style={[styles.seatText, { fontSize: seat * 0.36 }, paid && { color: c.onMarigold }]}>
-              {empty ? '' : isMe ? 'You' : member.toBase58().slice(0, 2)}
+            <Text style={[styles.seatText, { fontSize: seat * 0.36 }, paid && { color: c.onMarigold }, empty && { color: c.muted, fontSize: seat * 0.5 }]}>
+              {empty ? '+' : isMe ? 'You' : member.toBase58().slice(0, 2)}
             </Text>
           </View>
         );
