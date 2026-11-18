@@ -121,9 +121,10 @@ export function useSend() {
 /** Turn a wallet or program error into one line a person can act on. */
 export function explain(e: unknown): string {
   const s = e instanceof Error ? e.message : String(e);
+  console.warn('[ajo]', s);
   const known: [RegExp, string][] = [
     [/insufficient funds|0x1\b/i, 'Not enough test USDC or SOL in this wallet. See Settings for how to get some.'],
-    [/declined|rejected|cancel/i, 'You cancelled in the wallet.'],
+    [/declined|rejected|cancell?ed by (the )?user|user.*cancel/i, 'You cancelled in the wallet.'],
     [/AlreadyPaid|0x177d/i, 'You have already paid this round.'],
     [/RoundNotReady|0x177f/i, 'Not everyone has paid yet, and the grace period is still running.'],
     [/CircleFull|0x1777/i, 'This circle is full.'],
