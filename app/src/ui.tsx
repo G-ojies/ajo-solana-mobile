@@ -125,6 +125,7 @@ export function explain(e: unknown): string {
   const known: [RegExp, string][] = [
     [/insufficient funds|0x1\b/i, 'Not enough test USDC or SOL in this wallet. See Settings for how to get some.'],
     [/declined|rejected|cancell?ed by (the )?user|user.*cancel/i, 'You cancelled in the wallet.'],
+    [/UnknownHost|Unable to resolve host|Network request failed|fetch failed|ENOTFOUND|timed? ?out/i, 'No connection to Solana right now. Check your internet and pull down to refresh.'],
     [/CancellationException|not authenticated/i, 'The wallet closed before signing. Open your wallet, unlock it, and try again.'],
     [/payloads invalid|-2\//i, 'Your wallet account changed. Go to Settings, disconnect, and connect again.'],
     [/AlreadyPaid|0x177d/i, 'You have already paid this round.'],
