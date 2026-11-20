@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ajo",
     "slug": "ajo",
-    "version": "1.0.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,8 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "xyz.greyatlabs.ajo"
+      "package": "xyz.greyatlabs.ajo",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
