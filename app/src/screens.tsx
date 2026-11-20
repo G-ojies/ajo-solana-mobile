@@ -357,6 +357,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
   const send = useSend();
   const [x, setX] = useState<ajo.Circle | null | undefined>(undefined);
   const [history, setHistory] = useState<ajo.HistoryItem[]>([]);
+  const [all, setAll] = useState<ajo.Circle[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [clock, setClock] = useState(now());
   const key = new PublicKey(address);
@@ -370,6 +371,14 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
     setX(circle);
     setHistory(hist);
   }, [connection, address]);
+
+  // Every circle, for members' payment records. Loaded once (and on pull-to-refresh), not on the timer.
+  const loadAll = useCallback(async () => {
+    setAll(await ajo.fetchAllCircles(connection).catch(() => []));
+  }, [connection]);
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
 
   useEffect(() => {
     load();
@@ -418,6 +427,12 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
   const r = ajo.recipientIndex(x);
   const recipient = r !== null ? x.members[r] : null;
   const label = (k: PublicKey) => (me && k.equals(me) ? 'You' : short(k.toBase58()));
+  const record = (k: PublicKey) => {
+    if (all.length === 0) return null;
+    const r = ajo.memberRecord(all, k);
+    const bad = r.rounds > 0 && r.missed > 0;
+    return <Text style={[styles.record, bad && { color: c.red }]}>{ajo.recordText(r)}</Text>;
+  };
   const owed = me ? ajo.owedNow(x, me, clock) : null;
   const due = ajo.dueTs(x);
   const left = due - clock;
@@ -436,7 +451,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
   };
 
   return (
-    <Screen refresh={load}>
+    <Screen refresh={async () => { await Promise.all([load(), loadAll()]); }}>
       <TopBar
         title=""
         nav={nav}
@@ -519,7 +534,10 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
             return (
               <View key={round} style={styles.row}>
                 <Text style={styles.round}>{round + 1}</Text>
-                <Text style={[styles.member, me && m.equals(me) && { fontWeight: '800' }]}>{label(m)}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.member, me && m.equals(me) && { fontWeight: '800' }]}>{label(m)}</Text>
+                  {record(m)}
+                </View>
                 {x.missed[idx] > 0 && <Text style={styles.missed}>missed {x.missed[idx]}</Text>}
                 <Text style={[styles.badge, st === 'collected' && { color: c.green }, st === 'collecting now' && { color: c.gold }]}>{st}</Text>
               </View>
@@ -533,9 +551,13 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
       {x.state === 'forming' && (
         <Card style={{ gap: 8 }}>
           <Text style={styles.cardTitle}>Members</Text>
+          <Muted style={{ fontSize: 12 }}>Each member's record across all Ajo circles, read from the program.</Muted>
           {x.members.map((m, i) => (
             <View key={i} style={styles.row}>
-              <Text style={styles.member}>{label(m)}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.member}>{label(m)}</Text>
+                {record(m)}
+              </View>
               {i === 0 && <Text style={styles.badge}>creator</Text>}
             </View>
           ))}
@@ -599,6 +621,7 @@ export function Settings({ nav }: { nav: Nav }) {
   const { account, connection, disconnect } = useMobileWallet();
   const [sol, setSol] = useState<number | null>(null);
   const [usdc, setUsdc] = useState<string | null>(null);
+  const [rec, setRec] = useState<ajo.MemberRecord | null>(null);
 
   useEffect(() => {
     if (!account) return;
@@ -607,6 +630,7 @@ export function Settings({ nav }: { nav: Nav }) {
       .getTokenAccountBalance(ajo.ata(account.publicKey))
       .then((b) => setUsdc(b.value.uiAmountString ?? '0'))
       .catch(() => setUsdc('0'));
+    ajo.fetchAllCircles(connection).then((all) => setRec(ajo.memberRecord(all, account.publicKey))).catch(() => {});
   }, [account?.publicKey.toBase58()]);
 
   return (
@@ -618,6 +642,16 @@ export function Settings({ nav }: { nav: Nav }) {
         <Text selectable style={{ fontFamily: mono, color: c.ink }}>{account?.publicKey.toBase58() ?? 'Not connected'}</Text>
         <Muted>{sol === null ? '' : `${sol.toFixed(3)} SOL · ${usdc ?? '…'} test USDC`}</Muted>
       </Card>
+      {rec && (
+        <Card style={{ gap: 6 }}>
+          <Text style={styles.cardTitle}>Your payment record</Text>
+          <Text style={{ color: rec.missed > 0 ? c.red : c.green, fontWeight: '700', fontSize: 16 }}>{ajo.recordText(rec)}</Text>
+          <Muted>
+            Across {rec.circles} circle{rec.circles === 1 ? '' : 's'}. Other members see this before they join a circle with you. It comes straight from
+            the program, so nobody can edit it.
+          </Muted>
+        </Card>
+      )}
       <Card style={{ gap: 6 }}>
         <Text style={styles.cardTitle}>Network: Solana devnet</Text>
         <Muted>This build uses test money. Get test SOL for fees from the faucet. Test USDC comes from the circle organiser.</Muted>
@@ -653,5 +687,6 @@ const styles = StyleSheet.create({
   member: { flex: 1, color: c.ink, fontFamily: mono },
   missed: { color: c.red, backgroundColor: c.redSoft, paddingHorizontal: 6, borderRadius: 6, fontSize: 12 },
   badge: { color: c.muted, fontSize: 12 },
+  record: { color: c.muted, fontSize: 12, marginTop: 1 },
   code: { fontFamily: mono, fontSize: 26, letterSpacing: 4, color: c.indigo, fontWeight: '700' },
 });

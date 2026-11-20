@@ -8,6 +8,16 @@ import { DEVNET_RPC } from './src/ajo';
 import { CircleScreen, Create, Home, Join, Nav, Route, Settings } from './src/screens';
 import { c } from './src/theme';
 
+/**
+ * fetch for the Solana connection that aborts after 20 s. Without it, a request caught in a network
+ * blip can hang forever and hold one of the few connections to the RPC host, so later calls queue.
+ */
+const fetchWithTimeout: typeof fetch = (input, init) => {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), 20000);
+  return fetch(input, { ...init, signal: ac.signal }).finally(() => clearTimeout(t));
+};
+
 const identity = { name: 'Ajo', uri: 'https://g-ojies.github.io/ajo-solana-mobile/', icon: 'icon-192.png' };
 
 /** ajo://join/<circle address> or ajo://circle/<address> opens that circle. */
@@ -54,7 +64,7 @@ export default function App() {
 
   const route = stack[stack.length - 1];
   return (
-    <MobileWalletProvider chain="solana:devnet" endpoint={DEVNET_RPC} identity={identity}>
+    <MobileWalletProvider chain="solana:devnet" endpoint={DEVNET_RPC} identity={identity} commitmentOrConfig={{ commitment: 'confirmed', fetch: fetchWithTimeout }}>
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: StatusBar.currentHeight ?? 24 }}>
         <StatusBar barStyle="dark-content" />
         {route.name === 'home' && <Home nav={nav} />}

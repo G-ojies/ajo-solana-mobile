@@ -184,16 +184,24 @@ export function decodeCircle(address: PublicKey, data: Uint8Array): Circle {
 }
 
 export async function fetchCircle(conn: Connection, address: PublicKey): Promise<Circle | null> {
-  const acct = await conn.getAccountInfo(address);
+  const acct = await withTimeout(conn.getAccountInfo(address));
   if (!acct || !acct.owner.equals(PROGRAM_ID)) return null;
   return decodeCircle(address, acct.data);
 }
 
+/** Reject if `p` takes longer than `ms` (RPC calls can hang on weak mobile connections). */
+export function withTimeout<T>(p: Promise<T>, ms = 20000): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('Network request timed out')), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
+}
+
 /** Every circle of the program. Fine on devnet; mainnet would want an index. */
 export async function fetchAllCircles(conn: Connection): Promise<Circle[]> {
-  const accts = await conn.getProgramAccounts(PROGRAM_ID, {
+  const accts = await withTimeout(conn.getProgramAccounts(PROGRAM_ID, {
     filters: [{ memcmp: { offset: 0, bytes: bs58Disc() } }],
-  });
+  }));
   return accts
     .map((a) => {
       try {
@@ -257,6 +265,31 @@ export function joinCode(circle: PublicKey): string {
 
 export function hasPaid(c: Circle, i: number): boolean {
   return (c.paidMask & (1 << i)) !== 0;
+}
+
+export type MemberRecord = { circles: number; rounds: number; missed: number };
+
+/**
+ * A member's payment record across every circle, from the program's own counters: rounds that have
+ * been paid out while they were a member, and how many of those they missed. The current, unfinished
+ * round is not counted.
+ */
+export function memberRecord(circles: Circle[], member: PublicKey): MemberRecord {
+  const r: MemberRecord = { circles: 0, rounds: 0, missed: 0 };
+  for (const c of circles) {
+    const i = c.members.findIndex((m) => m.equals(member));
+    if (i < 0) continue;
+    r.circles += 1;
+    r.rounds += c.round;
+    r.missed += c.missed[i] ?? 0;
+  }
+  return r;
+}
+
+export function recordText(r: MemberRecord): string {
+  if (r.rounds === 0) return 'new: no rounds yet';
+  if (r.missed === 0) return `paid all ${r.rounds} round${r.rounds === 1 ? '' : 's'}`;
+  return `paid ${r.rounds - r.missed} of ${r.rounds} rounds`;
 }
 
 export function paidCount(c: Circle): number {
