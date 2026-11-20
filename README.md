@@ -49,7 +49,7 @@ Expo (SDK 58, React Native 0.88) custom dev build with Solana Mobile's Mobile Wa
 (`@wallet-ui/react-native-web3js`). Members sign every action in their phone wallet; there is no
 browser extension and no server.
 
-Screens: my circles, start a circle, join by code or `ajo://join/<circle>` link, the circle (dial of who
+Screens: my circles, start a circle, join by code, QR code or invite link (`g-ojies.github.io/ajo-solana-mobile/join/?c=<circle>`, a page that reads the circle from devnet and opens the app), the circle (dial of who
 has paid, pay my contribution, send the pot, payout order, on-chain history with explorer links) and settings.
 
 `app/src/ajo.ts` is a dependency-light client for the program (web3.js v1 + spl-token) shared by the
