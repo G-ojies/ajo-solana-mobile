@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { BackHandler, Linking, StatusBar, View } from 'react-native';
+import { BackHandler, LogBox, Linking, StatusBar, View } from 'react-native';
+
+// The public devnet RPC rate-limits now and then; web3.js retries by itself, so don't pop the dev overlay.
+LogBox.ignoreLogs(['Server responded with 429']);
 import { MobileWalletProvider } from '@wallet-ui/react-native-web3js';
 import { DEVNET_RPC } from './src/ajo';
 import { CircleScreen, Create, Home, Join, Nav, Route, Settings } from './src/screens';
@@ -9,7 +12,9 @@ const identity = { name: 'Ajo', uri: 'https://g-ojies.github.io/ajo-solana-mobil
 
 /** ajo://join/<circle address> or ajo://circle/<address> opens that circle. */
 function routeFromUrl(url: string | null | undefined): Route | null {
-  const m = url?.match(/^ajo:\/\/(?:join|circle)\/([1-9A-HJ-NP-Za-km-z]{32,44})/);
+  const m =
+    url?.match(/^ajo:\/\/(?:join|circle)\/([1-9A-HJ-NP-Za-km-z]{32,44})/) ??
+    url?.match(/^https:\/\/g-ojies\.github\.io\/ajo-solana-mobile\/join\/?\?c=([1-9A-HJ-NP-Za-km-z]{32,44})/);
   return m ? { name: 'circle', address: m[1] } : null;
 }
 
@@ -24,11 +29,11 @@ export default function App() {
   useEffect(() => {
     Linking.getInitialURL().then((u) => {
       const r = routeFromUrl(u);
-      if (r) nav.go(r);
+      if (r) setStack([{ name: 'home' }, r]);
     });
     const sub = Linking.addEventListener('url', ({ url }) => {
       const r = routeFromUrl(url);
-      if (r) nav.go(r);
+      if (r) setStack([{ name: 'home' }, r]);
     });
     const hw = BackHandler.addEventListener('hardwareBackPress', () => {
       let handled = false;

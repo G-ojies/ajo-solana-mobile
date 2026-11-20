@@ -4,6 +4,7 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { useMobileWallet } from '@wallet-ui/react-native-web3js';
 import * as ajo from './ajo';
 import { Dial } from './Dial';
+import { Qr } from './Qr';
 import { Button, Card, Chips, Field, H1, Muted, explain, useSend } from './ui';
 import { c, mono, naira, short } from './theme';
 
@@ -430,7 +431,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
   const invite = async () => {
     const code = ajo.joinCode(x.address);
     await Share.share({
-      message: `Join my ajo circle "${x.name}" on Ajo. ${ajo.formatUsdc(x.contribution)} USDC per round, ${x.capacity} members. Code: ${code}\najo://join/${x.address.toBase58()}`,
+      message: `Join my ajo circle "${x.name}" on Ajo: ${ajo.formatUsdc(x.contribution)} USDC per round, ${x.capacity} members. The pot is held by a Solana program, not by me.\n\n${ajo.inviteLink(x.address)}\n\nOr enter code ${code} in the app.`,
     });
   };
 
@@ -462,7 +463,15 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
           onPress={() => act('start', () => [ajo.startIx(me!, x.address)])} />
       )}
       {x.state === 'forming' && isMember && !isCreator && <Muted style={{ textAlign: 'center' }}>You are in. The creator starts the circle.</Muted>}
-      {x.state === 'forming' && <Button title="Share invite" kind="ghost" onPress={invite} />}
+      {x.state === 'forming' && (
+        <Card style={{ alignItems: 'center', gap: 10 }}>
+          <Text style={styles.cardTitle}>Invite members</Text>
+          <Qr value={ajo.inviteLink(x.address)} size={210} />
+          <Muted style={{ textAlign: 'center' }}>Scan with a phone camera, or share the link to your WhatsApp group.</Muted>
+          <Text style={styles.code}>{ajo.joinCode(x.address)}</Text>
+          <Button title="Share invite link" kind="gold" style={{ alignSelf: 'stretch' }} onPress={invite} />
+        </Card>
+      )}
       {x.state === 'forming' && isCreator && (
         <Button title="Cancel circle" kind="ghost" busy={busy === 'cancel'}
           onPress={() =>
@@ -644,4 +653,5 @@ const styles = StyleSheet.create({
   member: { flex: 1, color: c.ink, fontFamily: mono },
   missed: { color: c.red, backgroundColor: c.redSoft, paddingHorizontal: 6, borderRadius: 6, fontSize: 12 },
   badge: { color: c.muted, fontSize: 12 },
+  code: { fontFamily: mono, fontSize: 26, letterSpacing: 4, color: c.indigo, fontWeight: '700' },
 });

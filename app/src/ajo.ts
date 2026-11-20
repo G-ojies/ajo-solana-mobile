@@ -240,6 +240,13 @@ export async function findByCode(conn: Connection, code: string): Promise<Circle
   return all.find((x) => x.address.toBase58().startsWith(c)) ?? null;
 }
 
+/** Web page that shows the circle and opens the app (WhatsApp links https, not custom schemes). */
+export const JOIN_PAGE = 'https://g-ojies.github.io/ajo-solana-mobile/join/';
+
+export function inviteLink(circle: PublicKey): string {
+  return `${JOIN_PAGE}?c=${circle.toBase58()}`;
+}
+
 export function joinCode(circle: PublicKey): string {
   return circle.toBase58().slice(0, 6);
 }
