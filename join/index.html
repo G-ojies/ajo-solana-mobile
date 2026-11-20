@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join an ajo circle</title>
+<meta name="description" content="You've been invited to an ajo circle on Ajo. The pot is held by a Solana program, not by a person.">
+<meta property="og:title" content="You're invited to an ajo circle">
+<meta property="og:description" content="Ajo on Solana Mobile: the rotating savings circle, with the pot held by a program instead of a person.">
+<meta property="og:image" content="https://g-ojies.github.io/ajo-solana-mobile/icon.png">
+<link rel="icon" href="../favicon.png">
+<style>
+  :root { --bg:#f7f1e3; --card:#fffaf0; --ink:#171c3a; --muted:#565a73; --line:#e2d7bd; --indigo:#1a2763; --marigold:#f4ab1f; --red:#b4372b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: 32px 16px 48px; }
+  header { display:flex; gap:12px; align-items:center; margin-bottom: 20px; }
+  header img { width:48px; height:48px; border-radius:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; margin:16px 0; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  .muted { color:var(--muted); font-size:14px; }
+  .row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line); }
+  .row:last-child { border-bottom:0; }
+  .btn { display:block; text-align:center; text-decoration:none; font-weight:700; padding:15px; border-radius:14px; margin:10px 0; }
+  .primary { background:var(--indigo); color:#fff; }
+  .alt { border:1.5px solid var(--indigo); color:var(--indigo); }
+  code { font-size: 22px; letter-spacing: 3px; color: var(--indigo); font-weight: 700; }
+  .err { color: var(--red); }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="../icon-192.png" alt=""><div><b>Ajo</b><div class="muted">on Solana Mobile</div></div></header>
+  <div class="card" id="circle">
+    <div class="muted">Loading the circle from Solana…</div>
+  </div>
+  <a class="btn primary" id="open" href="#">Open in the Ajo app</a>
+  <a class="btn alt" href="https://github.com/G-ojies/ajo-solana-mobile/releases/latest">Get the Android app</a>
+  <p class="muted">Ajo keeps the pot in a Solana program, not with any one person. Everyone pays from their phone wallet, the pot goes to one member per round, and every payment is a public transaction. This is a test build on Solana devnet with test USDC.</p>
+  <p class="muted"><a href="../">About Ajo</a></p>
+</main>
+<script>
+(function () {
+  var PROGRAM = '66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b';
+  var DISC = [27, 59, 8, 117, 62, 199, 222, 252];
+  var c = new URLSearchParams(location.search).get('c') || '';
+  var box = document.getElementById('circle');
+  var open = document.getElementById('open');
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(c)) { box.innerHTML = '<div class="err">This invite link is missing its circle. Ask the organiser to share it again.</div>'; open.style.display = 'none'; return; }
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  open.href = isAndroid
+    ? 'intent://join/' + c + '#Intent;scheme=ajo;package=xyz.greyatlabs.ajo;S.browser_fallback_url=' + encodeURIComponent('https://github.com/G-ojies/ajo-solana-mobile/releases/latest') + ';end'
+    : 'ajo://join/' + c;
+  function u64(d, o) { var v = 0; for (var i = 7; i >= 0; i--) v = v * 256 + d[o + i]; return v; }
+  function i64(d, o) { var v = u64(d, o); return v > 9007199254740991 ? v - 18446744073709551616 : v; }
+  function u32(d, o) { return d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] * 16777216); }
+  function usdc(raw) { var s = (raw / 1e6).toFixed(6).replace(/\.?0+$/, ''); return s; }
+  function dur(s) { if (s < 7200) return Math.round(s / 60) + ' min'; if (s < 172800) return Math.round(s / 3600) + ' h'; return Math.round(s / 86400) + ' days'; }
+  fetch('https://api.devnet.solana.com', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getAccountInfo', params: [c, { encoding: 'base64' }] })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    var v = j && j.result && j.result.value;
+    if (!v || v.owner !== PROGRAM) { box.innerHTML = '<div class="err">No Ajo circle found at this address. It may have been closed.</div>'; open.style.display = 'none'; return; }
+    var d = Uint8Array.from(atob(v.data[0]), function (ch) { return ch.charCodeAt(0); });
+    for (var k = 0; k < 8; k++) if (d[k] !== DISC[k]) { box.innerHTML = '<div class="err">This address is not an Ajo circle.</div>'; open.style.display = 'none'; return; }
+    var o = 8 + 32 + 8;
+    var nl = u32(d, o); o += 4;
+    var name = new TextDecoder().decode(d.slice(o, o + nl)); o += nl;
+    o += 32 * 3;
+    var contribution = u64(d, o); o += 8;
+    var lateFee = u64(d, o); o += 8;
+    var roundSecs = i64(d, o); o += 8;
+    o += 8;
+    var capacity = d[o]; o += 1;
+    var state = ['forming', 'active', 'done'][d[o]]; o += 1;
+    o += 8 + 8 + 1 + 2;
+    var members = u32(d, o);
+    var code = c.slice(0, 6);
+    var status = state === 'forming' ? (members + ' of ' + capacity + ' joined · open to join') : state === 'active' ? 'Running · ' + members + ' members (no longer taking new members)' : 'Finished';
+    box.innerHTML =
+      '<div class="muted">You are invited to</div><h1>' + esc(name) + '</h1>' +
+      '<div class="row"><span>Each round</span><b>' + usdc(contribution) + ' USDC</b></div>' +
+      '<div class="row"><span>Pot per round</span><b>' + usdc(contribution * capacity) + ' USDC</b></div>' +
+      '<div class="row"><span>Members</span><b>' + capacity + '</b></div>' +
+      '<div class="row"><span>Round length</span><b>' + dur(roundSecs) + '</b></div>' +
+      '<div class="row"><span>Late fee</span><b>' + usdc(lateFee) + ' USDC</b></div>' +
+      '<div class="row"><span>Status</span><b>' + esc(status) + '</b></div>' +
+      '<p class="muted" style="margin:14px 0 4px">Code in the app</p><code>' + esc(code) + '</code>';
+    if (state !== 'forming') open.textContent = 'View in the Ajo app';
+  }).catch(function () { box.innerHTML = '<div class="err">Could not reach Solana right now. Try again in a moment.</div>'; });
+})();
+</script>
+</body>
+</html>
