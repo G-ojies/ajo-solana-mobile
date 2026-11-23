@@ -37,6 +37,12 @@ cargo test --release
 every validation error, late fees, forced payout after grace, and payouts to the wrong member, wallet
 or mint.
 
+5 more tests (`tests/rules.rs`) check the money and fairness rules by brute force: 1.1 million payout
+orders (100,000 per circle size, 2 to 12 members) all give every member exactly one turn, no member index
+collects first more than 5% above or below its fair share over 120,000 circles per size, "everyone has
+paid" holds for exactly one of the 65,536 paid masks at each size, and late fees and due times cannot
+overflow at the program's limits.
+
 ### Known limits
 
 - The payout order resists a careless creator, not members who grind keypairs before joining.
