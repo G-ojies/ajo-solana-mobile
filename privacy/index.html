@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy · Ajo on Solana Mobile</title>
+<link rel="icon" href="../favicon.png">
+<style>
+  :root { --bg:#f7f1e3; --card:#fffaf0; --ink:#171c3a; --muted:#565a73; --line:#e2d7bd; --indigo:#1a2763; --marigold:#f4ab1f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { display:flex; gap:16px; align-items:center; }
+  header img { width:56px; height:56px; border-radius:14px; }
+  h2 { font-size: 19px; margin: 28px 0 6px; color: var(--indigo); }
+  h1 { font-size: 30px; margin: 0; color: var(--indigo); }
+  .lede { font-size: 20px; margin: 24px 0; }
+  ol { padding-left: 20px; }
+  li { margin: 8px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 20px; margin:20px 0; }
+  a { color: var(--indigo); font-weight: 600; }
+  .btn { display:inline-block; background:var(--indigo); color:#fff; text-decoration:none; padding:12px 18px; border-radius:12px; margin: 4px 8px 4px 0; }
+  .btn.alt { background: transparent; color: var(--indigo); border: 1.5px solid var(--indigo); }
+  code { font-size: 13px; word-break: break-all; }
+  .muted { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <header><a href="../"><img src="../icon-192.png" alt="Ajo"></a><div><h1>Privacy policy</h1><div class="muted">Ajo on Solana Mobile · last updated 25 November 2026</div></div></header>
+
+  <p class="lede">Ajo has no accounts, no analytics and no server of its own. It does not collect your name, email, phone number, contacts, location or any other personal data.</p>
+
+  <h2>What stays on your phone</h2>
+  <p>When you connect a wallet, the app stores your wallet's public address and the authorization token your wallet app gives it, so you stay connected between launches. This is kept in the app's private storage on your device and is never sent to us. Disconnecting in Settings, clearing the app's data, or uninstalling removes it. Your private keys never reach Ajo: they stay in your wallet app, which signs each transaction after you approve it.</p>
+
+  <h2>What is public on Solana</h2>
+  <p>Ajo is a front end for a program on the Solana blockchain. When you create, join or pay into a circle, your wallet address, the amounts, the times and your payment record are written to Solana. Blockchain data is public and permanent: anyone can read it, and neither we nor anyone else can delete it. Do not put personal information in a circle's name.</p>
+
+  <h2>Services the app talks to</h2>
+  <ul>
+    <li><b>Solana RPC</b> (<code>api.devnet.solana.com</code>): the app reads circles and sends your signed transactions through it. Like any web service it sees your IP address and the requests made. The public devnet endpoint is run by the Solana Foundation under its own policies.</li>
+    <li><b>Your wallet app</b>, through Mobile Wallet Adapter, under that wallet's own privacy policy.</li>
+    <li><b>Links you choose to open</b>: Solana Explorer, the devnet faucet and invite pages on GitHub Pages open in your browser under those sites' policies.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Ajo is not directed at children under 13 and does not knowingly collect data from anyone.</p>
+
+  <h2>Changes and contact</h2>
+  <p>If this policy changes, the new version will be posted on this page with a new date. Questions: open an issue at <a href="https://github.com/G-ojies/ajo-solana-mobile/issues">github.com/G-ojies/ajo-solana-mobile/issues</a>.</p>
+
+  <p class="muted"><a href="../">Ajo home</a> · <a href="../terms/">Terms of use</a></p>
+</main>
+</body>
+</html>
