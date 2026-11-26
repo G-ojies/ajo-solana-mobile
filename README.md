@@ -51,9 +51,16 @@ overflow at the program's limits.
 
 ## App (`app/`)
 
-Expo (SDK 58, React Native 0.88) custom dev build with Solana Mobile's Mobile Wallet Adapter
-(`@wallet-ui/react-native-web3js`). Members sign every action in their phone wallet; there is no
-browser extension and no server.
+Native Android app: an Expo (SDK 58, React Native 0.88) custom dev build with Solana Mobile's Mobile
+Wallet Adapter (`@wallet-ui/react-native-web3js`). Members sign every action in their phone wallet;
+there is no browser extension, no web view and no server.
+
+**Template.** The app was not generated with `npx solana-mobile create`. It was set up by hand before
+the hackathon, on the same stack as Solana Mobile's official
+[`expo-web3js-minimal`](https://github.com/solana-mobile/templates/tree/main/mobile/expo-web3js-minimal)
+template: Expo 58, React Native 0.88, `@wallet-ui/react-native-web3js` 4.4.1 for MWA, web3.js v1 and
+`react-native-quick-crypto` with `react-native-nitro-modules`. It leaves out the template's
+expo-router, React Query and UI libraries and uses plain state-based navigation instead.
 
 Screens: my circles, start a circle, join by code, QR code or invite link (`g-ojies.github.io/ajo-solana-mobile/join/?c=<circle>`, a page that reads the circle from devnet and opens the app), the circle (dial of who
 has paid, pay my contribution, send the pot, payout order, on-chain history with explorer links) and settings.
@@ -80,8 +87,8 @@ Verified on devnet (18 Nov 2026):
 
 ## Built before vs during Dev3pack (27 to 29 Nov 2026)
 
-Before the event (allowed by the FAQ): the program and its tests, the app's first version, the scripts
-and the screen design.
+Before the event (allowed by the FAQ): the program and its tests, the app's first version (set up by
+hand, not from a template, see "Template" above), the scripts and the screen design.
 During the event: listed here as it happens.
 
 ## License
