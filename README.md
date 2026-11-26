@@ -43,6 +43,14 @@ collects first more than 5% above or below its fair share over 120,000 circles p
 paid" holds for exactly one of the 65,536 paid masks at each size, and late fees and due times cannot
 overflow at the program's limits.
 
+5 Kani proofs (`src/proofs.rs`, run with `cargo kani -p ajo`) check the same rules for every input
+within stated bounds, not a sample: the shuffle behind the payout order gives every member exactly one
+turn for any random words (2 to 6 members), "everyone has paid" is exact for every mask (up to 12
+members), the amount owed is the contribution plus the late fee only when late and cannot overflow,
+due times are exact and strictly increase, and the pot's recipient lookup never panics. Larger circle
+sizes for the shuffle are covered by the brute-force test above; the 64-bit arithmetic makes them too
+big for the model checker.
+
 ### Known limits
 
 - The payout order resists a careless creator, not members who grind keypairs before joining.
