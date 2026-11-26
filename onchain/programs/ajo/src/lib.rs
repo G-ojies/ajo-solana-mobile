@@ -15,6 +15,8 @@ use anchor_spl::token_interface::{
 
 pub mod error;
 pub mod state;
+#[cfg(kani)]
+mod proofs;
 
 pub use error::AjoError;
 pub use state::*;
@@ -43,6 +45,11 @@ pub fn draw_order(seed: &[u8], n: usize) -> Vec<u8> {
         state ^= state >> 27;
         state.wrapping_mul(0x2545_f491_4f6c_dd1d)
     };
+    shuffle(n, next)
+}
+
+/// Fisher-Yates shuffle of `0..n`, driven by any source of random words.
+pub fn shuffle(n: usize, mut next: impl FnMut() -> u64) -> Vec<u8> {
     let mut order: Vec<u8> = (0..n as u8).collect();
     for i in (1..n).rev() {
         let j = (next() % (i as u64 + 1)) as usize;
