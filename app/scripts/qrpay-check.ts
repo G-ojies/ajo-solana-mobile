@@ -25,7 +25,7 @@ async function setup() {
   ], [payer]);
   const circleId = BigInt(Date.now());
   const circle = ajo.circlePda(payer.publicKey, circleId);
-  await go([ajo.createCircleIx(payer.publicKey, { circleId, name: 'QR pay check', contribution: 10_000_000n, capacity: 2, roundSecs: 3600, graceSecs: 600, lateFee: 1_000_000n })], [payer]);
+  await go([ajo.createCircleIx(payer.publicKey, { circleId, name: process.env.NAME ?? 'QR pay check', contribution: 10_000_000n, capacity: 2, roundSecs: 3600, graceSecs: 600, lateFee: 1_000_000n })], [payer]);
   await go([ajo.joinIx(member.publicKey, circle)], [payer, member]);
   await go([ajo.startIx(payer.publicKey, circle)], [payer]);
   console.log(circle.toBase58());
