@@ -10,3 +10,4 @@ onchain/target/
 DESIGN.md
 docs/
 *.private.md
+.vercel
