@@ -255,6 +255,19 @@ export function inviteLink(circle: PublicKey): string {
   return `${JOIN_PAGE}?c=${circle.toBase58()}`;
 }
 
+/** Solana Pay transaction-request endpoint (api/pay.ts at the repo root, deployed on Vercel). */
+export const PAY_API = 'https://ajo-pay.vercel.app/api/pay';
+
+/**
+ * Solana Pay link a member scans with any wallet that supports transaction requests to pay their
+ * round. The endpoint builds the same `contribute` transaction the app sends; `reference` is a
+ * random key the app watches with getSignaturesForAddress to notice the payment.
+ */
+export function payRequestUrl(circle: PublicKey, reference?: PublicKey): string {
+  const q = `circle=${circle.toBase58()}${reference ? `&reference=${reference.toBase58()}` : ''}`;
+  return `solana:${encodeURIComponent(`${PAY_API}?${q}`)}`;
+}
+
 export function joinCode(circle: PublicKey): string {
   return circle.toBase58().slice(0, 6);
 }

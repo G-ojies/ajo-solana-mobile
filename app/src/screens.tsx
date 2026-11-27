@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { useMobileWallet } from '@wallet-ui/react-native-web3js';
 import * as ajo from './ajo';
 import { Dial } from './Dial';
@@ -506,6 +506,7 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
           onPress={() => act('pay', () => [ajo.contributeIx(me!, x)])} />
       )}
       {x.state === 'active' && isMember && !owed && <Text style={[styles.status, { color: c.green }]}>Paid this round ✓</Text>}
+      {x.state === 'active' && <PayByQr circle={x} connection={connection} onPaid={load} />}
       {x.state === 'active' && ajo.canPayout(x, clock) && me && recipient && (
         <Button title={ajo.paidCount(x) === n ? `Send pot to ${label(recipient)}` : `Send pot to ${label(recipient)} (${n - ajo.paidCount(x)} missed)`} busy={busy === 'payout'}
           onPress={() => act('payout', () => ajo.payoutIxs(me, x))} />
@@ -582,6 +583,55 @@ export function CircleScreen({ nav, address }: { nav: Nav; address: string }) {
         <Muted style={{ textAlign: 'center', textDecorationLine: 'underline' }}>View circle on Solana Explorer</Muted>
       </Pressable>
     </Screen>
+  );
+}
+
+/**
+ * Solana Pay: a QR any member can scan with a wallet that supports transaction requests, on this
+ * phone or another one. The wallet asks api/pay.ts for the `contribute` transaction and signs it.
+ * The random reference key in the link lets us notice the payment and refresh the circle.
+ */
+function PayByQr({ circle, connection, onPaid }: { circle: ajo.Circle; connection: Connection; onPaid: () => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [seen, setSeen] = useState(0);
+  const reference = useMemo(() => Keypair.generate().publicKey, [open, seen]);
+  const link = ajo.payRequestUrl(circle.address, reference);
+
+  useEffect(() => {
+    if (!open) return;
+    let stop = false;
+    const t = setInterval(async () => {
+      try {
+        const sigs = await connection.getSignaturesForAddress(reference, { limit: 1 }, 'confirmed');
+        if (!stop && sigs.length > 0 && !sigs[0].err) {
+          setSeen((k) => k + 1); // new reference for the next member
+          await onPaid();
+        }
+      } catch {
+        // keep polling; weak connections drop requests
+      }
+    }, 5000);
+    return () => {
+      stop = true;
+      clearInterval(t);
+    };
+  }, [open, reference.toBase58()]);
+
+  if (!open) {
+    return <Button title="Pay from another wallet (Solana Pay QR)" kind="ghost" onPress={() => setOpen(true)} />;
+  }
+  return (
+    <Card style={{ alignItems: 'center', gap: 10 }}>
+      <Text style={styles.cardTitle}>Pay with Solana Pay</Text>
+      <Qr value={link} size={230} />
+      <Muted style={{ textAlign: 'center' }}>
+        Any member of this circle can scan this with a Solana Pay wallet to pay round {circle.round + 1}. The wallet signs; nobody else holds keys.
+      </Muted>
+      {seen > 0 && <Text style={[styles.status, { color: c.green }]}>{seen} payment{seen > 1 ? 's' : ''} received through this QR ✓</Text>}
+      <Button title="Open in a wallet on this phone" kind="gold" style={{ alignSelf: 'stretch' }}
+        onPress={() => Linking.openURL(link).catch(() => Alert.alert('No Solana Pay wallet', 'Install a wallet that supports Solana Pay, or scan the QR from another phone.'))} />
+      <Button title="Hide" kind="ghost" onPress={() => setOpen(false)} />
+    </Card>
   );
 }
 
