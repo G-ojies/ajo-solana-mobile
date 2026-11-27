@@ -26,6 +26,7 @@
   .alt { border:1.5px solid var(--indigo); color:var(--indigo); }
   code { font-size: 22px; letter-spacing: 3px; color: var(--indigo); font-weight: 700; }
   .err { color: var(--red); }
+  #pay svg { width: 230px; height: 230px; display:block; margin: 8px auto; }
 </style>
 </head>
 <body>
@@ -34,13 +35,16 @@
   <div class="card" id="circle">
     <div class="muted">Loading the circle from Solana…</div>
   </div>
+  <div class="card" id="pay" style="display:none"></div>
   <a class="btn primary" id="open" href="#">Open in the Ajo app</a>
   <a class="btn alt" href="https://github.com/G-ojies/ajo-solana-mobile/releases/latest">Get the Android app</a>
   <p class="muted">Ajo keeps the pot in a Solana program, not with any one person. Everyone pays from their phone wallet, the pot goes to one member per round, and every payment is a public transaction. This is a test build on Solana devnet with test USDC.</p>
   <p class="muted"><a href="../">About Ajo</a></p>
 </main>
+<script src="qr.js"></script>
 <script>
 (function () {
+  var PAY_API = 'https://ajo-pay.vercel.app/api/pay';
   var PROGRAM = '66oEASieGnPhV51Xi1TVWFhotG3TfjpBYXHVUPpVXF7b';
   var DISC = [27, 59, 8, 117, 62, 199, 222, 252];
   var c = new URLSearchParams(location.search).get('c') || '';
@@ -89,6 +93,16 @@
       '<div class="row"><span>Status</span><b>' + esc(status) + '</b></div>' +
       '<p class="muted" style="margin:14px 0 4px">Code in the app</p><code>' + esc(code) + '</code>';
     if (state !== 'forming') open.textContent = 'View in the Ajo app';
+    if (state === 'active') {
+      // Solana Pay transaction request: the wallet fetches the contribute transaction from api/pay and signs it.
+      var link = 'solana:' + encodeURIComponent(PAY_API + '?circle=' + c);
+      var pay = document.getElementById('pay');
+      var qr = window.AjoQr ? window.AjoQr(link) : '';
+      pay.innerHTML = '<b>Members: pay this round from any wallet</b>' +
+        '<p class="muted" style="margin:6px 0">Scan with a wallet that supports Solana Pay, or tap the button on a phone with one. The wallet shows the amount and signs; nobody else holds your keys.</p>' +
+        qr + '<a class="btn primary" href="' + esc(link) + '">Pay with a Solana Pay wallet</a>';
+      pay.style.display = 'block';
+    }
   }).catch(function () { box.innerHTML = '<div class="err">Could not reach Solana right now. Try again in a moment.</div>'; });
 })();
 </script>
