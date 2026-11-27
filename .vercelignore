@@ -1,0 +1,14 @@
+# Only api/, app/src/ajo.ts and the root package files are needed by the endpoint.
+PLAN*.md
+DESIGN.md
+docs/
+*.private.md
+onchain/
+app/node_modules/
+app/android/
+app/ios/
+app/assets/
+app/scripts/
+*.log
+.env*
+.git/
