@@ -97,7 +97,17 @@ Verified on devnet (18 Nov 2026):
 
 Before the event (allowed by the FAQ): the program and its tests, the app's first version (set up by
 hand, not from a template, see "Template" above), the scripts and the screen design.
-During the event: listed here as it happens.
+During the event (27 to 29 Nov): **Solana Pay.** A member can pay their round from any wallet that
+supports Solana Pay transaction requests, by scanning a QR in the app (on an active circle) or on the
+circle's web page. A small serverless endpoint, [`api/pay.ts`](api/pay.ts), builds the same `contribute`
+transaction the app sends. The wallet is the only signer and the fee payer, so the server holds no keys,
+and the program did not change. A random reference key in the link lets the app notice the payment.
+- `app/scripts/refcheck.ts`: on devnet, `contribute` with an extra reference key still succeeds and the
+  reference finds the transaction.
+- `app/scripts/paytx.ts`: acts as the wallet against the endpoint on devnet. It covers the label and
+  icon, refusals (bad or unknown circle, non-member, not enough USDC, already paid), and a signed
+  payment that sets the paid bit and is found by its reference. 15 checks.
+- Status: endpoint tested with a Node signer; scanning with a real wallet app is still pending.
 
 ## License
 
