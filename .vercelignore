@@ -12,3 +12,4 @@ app/scripts/
 *.log
 .env*
 .git/
+app/.expo/

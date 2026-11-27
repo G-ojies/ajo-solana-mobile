@@ -256,7 +256,7 @@ export function inviteLink(circle: PublicKey): string {
 }
 
 /** Solana Pay transaction-request endpoint (api/pay.ts at the repo root, deployed on Vercel). */
-export const PAY_API = 'https://ajo-pay.vercel.app/api/pay';
+export const PAY_API = 'https://ajo-pay-eight.vercel.app/api/pay';
 
 /**
  * Solana Pay link a member scans with any wallet that supports transaction requests to pay their

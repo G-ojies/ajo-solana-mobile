@@ -2,10 +2,17 @@
   "name": "ajo-pay",
   "private": true,
   "description": "Solana Pay transaction-request endpoint for Ajo circles (api/pay.ts)",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@solana/spl-token": "^0.4.15",
     "@solana/web3.js": "^1.99.0",
     "buffer": "^6.0.3"
+  },
+  "overrides": {
+    "rpc-websockets": {
+      "uuid": "^11.1.0"
+    }
   }
 }
