@@ -107,7 +107,11 @@ and the program did not change. A random reference key in the link lets the app 
 - `app/scripts/paytx.ts`: acts as the wallet against the endpoint on devnet. It covers the label and
   icon, refusals (bad or unknown circle, non-member, not enough USDC, already paid), and a signed
   payment that sets the paid bit and is found by its reference. 15 checks.
-- Status: endpoint tested with a Node signer; scanning with a real wallet app is still pending.
+- `app/scripts/qrpay-check.ts`: with v0.3.0 on an Android emulator, the QR the app shows was decoded and
+  paid through the deployed endpoint; the app picked up the payment by its reference within seconds,
+  showed "1 payment received" and moved to a fresh reference for the next member.
+- Status: endpoint tested with a Node signer acting as the wallet; scanning with a real wallet app is
+  still pending.
 
 ## License
 
